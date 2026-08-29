@@ -1,0 +1,2756 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>FINAL RACE — Step 16</title>
+
+<style>
+*{
+    box-sizing:border-box;
+}
+
+html,body{
+    margin:0;
+    width:100%;
+    height:100%;
+    overflow:hidden;
+    font-family:Arial,sans-serif;
+    color:#fff;
+}
+
+body{
+    background:repeating-linear-gradient(
+        #246b24 0 80px,
+        #2d7a2d 80px 160px
+    );
+}
+
+#game{
+    position:relative;
+    height:100vh;
+    overflow:hidden;
+}
+
+/* =========================
+   TOP BAR
+========================= */
+
+#bar{
+    position:absolute;
+    top:0;
+    width:100%;
+    min-height:63px;
+    z-index:100;
+    background:#000d;
+    display:flex;
+    justify-content:space-around;
+    align-items:center;
+    gap:6px;
+    padding:5px;
+    font-weight:bold;
+    font-size:14px;
+}
+
+#meter{
+    width:90px;
+    height:11px;
+    border:1px solid #bdf5ff;
+    border-radius:20px;
+    overflow:hidden;
+    background:#172431;
+    margin-top:3px;
+}
+
+#fill{
+    height:100%;
+    width:100%;
+    background:linear-gradient(
+        90deg,
+        #00a8ff,
+        #75efff
+    );
+    transition:.08s;
+}
+
+/* =========================
+   BOSS HEALTH
+========================= */
+
+#bossHUD{
+    position:absolute;
+    top:70px;
+    left:50%;
+    transform:translateX(-50%);
+    width:min(350px,75vw);
+    z-index:110;
+    display:none;
+    text-align:center;
+    pointer-events:none;
+}
+
+#bossName{
+    font-size:15px;
+    font-weight:900;
+    text-shadow:0 2px 5px #000;
+    margin-bottom:4px;
+}
+
+#bossBar{
+    height:17px;
+    border:2px solid white;
+    border-radius:20px;
+    overflow:hidden;
+    background:#180018;
+    box-shadow:0 0 15px #000;
+}
+
+#bossFill{
+    width:100%;
+    height:100%;
+    background:linear-gradient(
+        90deg,
+        #7a00ff,
+        #ff00e6,
+        #ff4040
+    );
+    transition:width .15s;
+}
+
+#bossPhase{
+    font-size:11px;
+    font-weight:bold;
+    margin-top:3px;
+    text-shadow:0 2px 4px #000;
+}
+
+/* =========================
+   BOSS WARNING
+========================= */
+
+#bossWarning{
+    position:absolute;
+    top:45%;
+    left:50%;
+    transform:translate(-50%,-50%) scale(.7);
+    z-index:180;
+    font-size:30px;
+    font-weight:1000;
+    color:#fff;
+    text-align:center;
+    text-shadow:
+        0 0 15px #ff0000,
+        0 4px 8px #000;
+    opacity:0;
+    pointer-events:none;
+    transition:.15s;
+}
+
+#bossWarning.show{
+    opacity:1;
+    transform:translate(-50%,-50%) scale(1);
+    animation:warningPulse .35s alternate infinite;
+}
+
+@keyframes warningPulse{
+    to{
+        transform:translate(-50%,-50%) scale(1.12);
+    }
+}
+
+/* =========================
+   ROAD
+========================= */
+
+#road{
+    position:absolute;
+    left:50%;
+    transform:translateX(-50%);
+    width:420px;
+    height:100%;
+    overflow:hidden;
+    z-index:5;
+    background:
+        repeating-linear-gradient(
+            #444 0 70px,
+            #414141 70px 140px
+        );
+    border-inline:12px solid #777;
+    box-shadow:0 0 25px #000;
+}
+
+#road:before,
+#road:after{
+    content:"";
+    position:absolute;
+    top:0;
+    width:7px;
+    height:100%;
+    z-index:3;
+    background:
+        repeating-linear-gradient(
+            #fff 0 35px,
+            #d22 35px 70px
+        );
+}
+
+#road:before{
+    left:0;
+}
+
+#road:after{
+    right:0;
+}
+
+.line{
+    position:absolute;
+    top:-100px;
+    width:6px;
+    height:100px;
+    background:#fff;
+    z-index:4;
+    border-radius:4px;
+}
+
+.a{
+    left:33.33%;
+}
+
+.b{
+    left:66.66%;
+}
+
+/* =========================
+   CARS
+========================= */
+
+.car{
+    position:absolute;
+    width:58px;
+    height:100px;
+    border-radius:16px;
+    transform:translateX(-50%);
+    box-shadow:0 8px 15px #000c;
+}
+
+.car:before{
+    content:"";
+    position:absolute;
+    left:10px;
+    top:13px;
+    width:38px;
+    height:30px;
+    border:2px solid #111;
+    border-radius:10px 10px 5px 5px;
+    background:linear-gradient(
+        135deg,
+        #b8f1ff,
+        #16465b
+    );
+}
+
+#player{
+    bottom:100px;
+    z-index:20;
+    background:
+        linear-gradient(
+            90deg,
+            #8d0000,
+            #ff3030,
+            #8d0000
+        );
+    transition:left .18s,transform .12s;
+}
+
+.enemy{
+    top:-120px;
+    z-index:15;
+}
+
+.red{
+    background:
+        linear-gradient(
+            90deg,
+            #700,
+            #f33,
+            #700
+        );
+}
+
+.blue{
+    background:
+        linear-gradient(
+            90deg,
+            #036,
+            #18f,
+            #036
+        );
+}
+
+.yellow{
+    background:
+        linear-gradient(
+            90deg,
+            #976000,
+            #ffe100,
+            #976000
+        );
+}
+
+.green{
+    background:
+        linear-gradient(
+            90deg,
+            #064b1c,
+            #20b84b,
+            #064b1c
+        );
+}
+
+.orange{
+    background:
+        linear-gradient(
+            90deg,
+            #853900,
+            #ff8500,
+            #853900
+        );
+}
+
+/* =========================
+   BOSS
+========================= */
+
+.boss{
+    top:-160px;
+    width:92px;
+    height:145px;
+    z-index:18;
+    background:
+        linear-gradient(
+            90deg,
+            #21003e,
+            #a000f5,
+            #21003e
+        );
+    border:4px solid #f4d0ff;
+    box-shadow:
+        0 0 22px #ce41ff,
+        0 0 45px #7200ff;
+}
+
+.boss.rage{
+    animation:bossRage .18s alternate infinite;
+}
+
+@keyframes bossRage{
+    from{
+        box-shadow:
+            0 0 20px #ff0000,
+            0 0 40px #ff00e6;
+    }
+
+    to{
+        box-shadow:
+            0 0 35px #ff0000,
+            0 0 65px #ff00e6;
+    }
+}
+
+/* =========================
+   TYRES
+========================= */
+
+.tyre{
+    position:absolute;
+    width:9px;
+    height:25px;
+    background:#111;
+    border-radius:4px;
+}
+
+.fl{
+    left:-6px;
+    top:18px;
+}
+
+.fr{
+    right:-6px;
+    top:18px;
+}
+
+.bl{
+    left:-6px;
+    bottom:18px;
+}
+
+.br{
+    right:-6px;
+    bottom:18px;
+}
+
+/* =========================
+   PLAYER
+========================= */
+
+.stripe{
+    position:absolute;
+    left:50%;
+    width:5px;
+    height:100%;
+    background:#fff5;
+    transform:translateX(-50%);
+}
+
+.flame{
+    position:absolute;
+    left:50%;
+    bottom:-38px;
+    width:28px;
+    height:52px;
+    opacity:0;
+    transform:
+        translateX(-50%)
+        scaleY(.25);
+    transform-origin:top;
+    clip-path:
+        polygon(
+            50% 100%,
+            0 22%,
+            34% 35%,
+            50% 0,
+            66% 35%,
+            100% 22%
+        );
+    background:
+        linear-gradient(
+            #e8fbff,
+            #00b8ff 30%,
+            #ffdf00 55%,
+            #f50 80%,
+            transparent
+        );
+    filter:
+        drop-shadow(
+            0 0 9px #00c8ff
+        );
+}
+
+.boost .flame{
+    opacity:1;
+    transform:
+        translateX(-50%)
+        scaleY(1);
+    animation:
+        flame .1s alternate infinite;
+}
+
+@keyframes flame{
+    to{
+        height:62px;
+    }
+}
+
+.shield{
+    box-shadow:
+        0 0 10px 5px #36e9ff,
+        0 8px 15px #000c!important;
+}
+
+/* =========================
+   OIL
+========================= */
+
+.oil{
+    position:absolute;
+    top:-80px;
+    width:104px;
+    height:64px;
+    background:#090909;
+    border-radius:55% 45% 60% 40%;
+    transform:translateX(-50%) rotate(-8deg);
+    box-shadow:0 0 10px #000;
+}
+
+.oil:after{
+    content:"⚠ OIL";
+    position:absolute;
+    left:23px;
+    top:25px;
+    color:#ffd600;
+    font-weight:bold;
+}
+
+/* =========================
+   ITEMS
+========================= */
+
+.item{
+    position:absolute;
+    top:-55px;
+    width:48px;
+    height:48px;
+    z-index:17;
+    transform:translateX(-50%);
+    display:grid;
+    place-items:center;
+    font-size:37px;
+    filter:drop-shadow(0 3px 3px #000);
+    animation:spin 1s linear infinite;
+}
+
+@keyframes spin{
+    to{
+        transform:
+            translateX(-50%)
+            rotate(360deg);
+    }
+}
+
+/* =========================
+   BOSS ATTACK TOKEN
+========================= */
+
+.attackToken{
+    position:absolute;
+    top:-65px;
+    width:55px;
+    height:55px;
+    z-index:25;
+    transform:translateX(-50%);
+    display:grid;
+    place-items:center;
+    font-size:43px;
+    filter:
+        drop-shadow(0 0 8px #00eaff)
+        drop-shadow(0 3px 4px #000);
+    animation:
+        attackSpin .45s linear infinite,
+        attackPulse .3s alternate infinite;
+}
+
+@keyframes attackSpin{
+    to{
+        transform:
+            translateX(-50%)
+            rotate(360deg);
+    }
+}
+
+@keyframes attackPulse{
+    to{
+        filter:
+            drop-shadow(0 0 20px #00eaff)
+            drop-shadow(0 3px 4px #000);
+    }
+}
+
+/* =========================
+   FX
+========================= */
+
+#fx{
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    z-index:40;
+    opacity:0;
+}
+
+.s{
+    position:absolute;
+    width:3px;
+    height:70px;
+    background:#fffc;
+    animation:
+        speed .45s linear infinite;
+}
+
+.s:nth-child(1){
+    left:12%;
+    top:10%;
+}
+
+.s:nth-child(2){
+    left:22%;
+    top:40%;
+}
+
+.s:nth-child(3){
+    left:78%;
+    top:20%;
+}
+
+.s:nth-child(4){
+    left:88%;
+    top:50%;
+}
+
+.s:nth-child(5){
+    left:8%;
+    top:70%;
+}
+
+.s:nth-child(6){
+    left:92%;
+    top:80%;
+}
+
+#fx.nitro .s{
+    width:5px;
+    animation-duration:.16s;
+    box-shadow:0 0 10px #5df;
+}
+
+@keyframes speed{
+    from{
+        transform:translateY(-100px);
+        opacity:0;
+    }
+
+    30%{
+        opacity:1;
+    }
+
+    to{
+        transform:translateY(500px);
+        opacity:0;
+    }
+}
+
+/* =========================
+   CONTROLS
+========================= */
+
+#controls{
+    position:absolute;
+    bottom:24px;
+    width:100%;
+    z-index:80;
+    display:flex;
+    justify-content:center;
+    gap:18px;
+}
+
+.btn{
+    width:72px;
+    height:72px;
+    border:2px solid #fff;
+    border-radius:50%;
+    background:#000b;
+    color:white;
+    font-size:28px;
+    touch-action:none;
+}
+
+#nitro{
+    width:110px;
+    border-color:#7eeaff;
+    background:
+        linear-gradient(
+            135deg,
+            #00a8ff,
+            #0c2673
+        );
+    font-size:15px;
+    font-weight:bold;
+    box-shadow:0 0 14px #00beff;
+}
+
+.active{
+    transform:scale(.92)!important;
+    box-shadow:
+        0 0 24px #00d9ff!important;
+}
+
+/* =========================
+   SCREEN
+========================= */
+
+#screen{
+    position:absolute;
+    inset:0;
+    z-index:200;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    background:#000f;
+}
+
+#screen p{
+    color:#ccc;
+    margin:6px;
+    font-size:18px;
+}
+
+#start{
+    margin-top:20px;
+    padding:15px 42px;
+    border:0;
+    border-radius:10px;
+    background:#00c853;
+    color:#fff;
+    font-size:20px;
+    font-weight:bold;
+}
+
+#count{
+    display:none;
+    position:absolute;
+    left:50%;
+    top:45%;
+    z-index:150;
+    transform:translate(-50%,-50%);
+    font-size:90px;
+    font-weight:bold;
+    text-shadow:0 0 20px #000;
+}
+
+/* =========================
+   BOSS DEFEATED
+========================= */
+
+#bossDefeat{
+    position:absolute;
+    left:50%;
+    top:45%;
+    transform:translate(-50%,-50%) scale(.5);
+    z-index:190;
+    opacity:0;
+    pointer-events:none;
+    text-align:center;
+    font-size:38px;
+    font-weight:1000;
+    text-shadow:
+        0 0 20px #ff00e6,
+        0 4px 8px #000;
+}
+
+#bossDefeat.show{
+    opacity:1;
+    transform:
+        translate(-50%,-50%)
+        scale(1);
+    transition:.25s;
+}
+
+@media(max-width:600px){
+
+    #road{
+        width:280px;
+    }
+
+    #bar{
+        font-size:10px;
+    }
+
+    .car{
+        width:48px;
+        height:85px;
+    }
+
+    .boss{
+        width:76px;
+        height:120px;
+    }
+
+    .btn{
+        width:62px;
+        height:62px;
+    }
+
+    #nitro{
+        width:88px;
+        font-size:12px;
+    }
+
+    #meter{
+        width:62px;
+    }
+
+    #bossHUD{
+        top:66px;
+        width:250px;
+    }
+
+    #bossWarning{
+        font-size:22px;
+    }
+
+    #bossDefeat{
+        font-size:27px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div id="game">
+
+<div id="bar">
+
+<div>🏆 <span id="score">0</span></div>
+
+<div>❤️ <span id="lives">3</span></div>
+
+<div>🏁 <span id="distance">0.0</span> KM</div>
+
+<div>⭐ LV <span id="level">1</span></div>
+
+<div>🪙 <span id="coins">0</span></div>
+
+<div>
+🚀 <span id="nitroVal">100</span>%
+
+<div id="meter">
+<div id="fill"></div>
+</div>
+
+</div>
+
+</div>
+
+<!-- BOSS HUD -->
+
+<div id="bossHUD">
+
+<div id="bossName">
+👑 BOSS
+</div>
+
+<div id="bossBar">
+<div id="bossFill"></div>
+</div>
+
+<div id="bossPhase">
+PHASE 1 — HUNTER
+</div>
+
+</div>
+
+<div id="bossWarning">
+⚠️ BOSS ATTACK!
+</div>
+
+<div id="bossDefeat">
+💥 BOSS DEFEATED! 💥
+</div>
+
+<!-- SPEED FX -->
+
+<div id="fx">
+
+<i class="s"></i>
+<i class="s"></i>
+<i class="s"></i>
+<i class="s"></i>
+<i class="s"></i>
+<i class="s"></i>
+
+</div>
+
+<div id="count">3</div>
+
+<!-- ROAD -->
+
+<div id="road">
+
+<i class="line a" id="l1"></i>
+<i class="line b" id="l2"></i>
+
+<div class="car" id="player">
+
+<i class="flame"></i>
+
+<i class="stripe"></i>
+
+<i class="tyre fl"></i>
+<i class="tyre fr"></i>
+<i class="tyre bl"></i>
+<i class="tyre br"></i>
+
+</div>
+
+</div>
+
+<!-- CONTROLS -->
+
+<div id="controls">
+
+<button class="btn" id="left">◀</button>
+
+<button class="btn" id="right">▶</button>
+
+<button class="btn" id="nitro">
+🚀 NITRO
+</button>
+
+</div>
+
+<!-- START SCREEN -->
+
+<div id="screen">
+
+<h1 id="title">
+🏎️ FINAL RACE
+</h1>
+
+<p id="msg">
+Step 16 — defeat the boss using ⚡ attack tokens!
+</p>
+
+<p>
+Arrow keys / buttons to steer
+</p>
+
+<p>
+Hold SPACE or NITRO to boost
+</p>
+
+<p>
+⚡ Collect attack tokens to damage the boss
+</p>
+
+<button id="start">
+START RACE
+</button>
+
+</div>
+
+</div>
+
+<script>
+
+/* =====================================================
+   GAME VARIABLES
+===================================================== */
+
+const $ = x => document.getElementById(x);
+
+const p = $("player");
+const road = $("road");
+
+const lanes = [16.66,50,83.33];
+
+let lane = 1;
+
+let run = 0;
+
+let score = 0;
+let lives = 3;
+let dist = 0;
+let nitro = 100;
+let held = 0;
+let boost = 0;
+let coins = 0;
+
+let shield = 0;
+let magnetUntil = 0;
+
+let enemy = [];
+let oil = [];
+let items = [];
+let attacks = [];
+
+let boss = null;
+
+let et = 0;
+let ot = 0;
+let it = 0;
+let at = 0;
+let line = 0;
+
+let level = 1;
+let bonus = 0;
+
+let audio = null;
+let countingDown = false;
+
+let high =
+    Number(
+        localStorage.getItem("finalRaceHighScore") || 0
+    );
+
+/* =====================================================
+   BOSS VARIABLES
+===================================================== */
+
+let bossMaxHP = 100;
+let bossHP = 100;
+let bossPhase = 1;
+
+let bossAttackTimer = 0;
+let bossLaneTimer = 0;
+
+let bossAttacking = false;
+let bossAttackSpeed = 0;
+
+/* =====================================================
+   SOUND
+===================================================== */
+
+function sound(f,d=.12,t="sine",v=.08){
+
+    try{
+
+        if(!audio)return;
+
+        let o = audio.createOscillator();
+        let g = audio.createGain();
+
+        o.type = t;
+        o.frequency.value = f;
+
+        g.gain.setValueAtTime(
+            v,
+            audio.currentTime
+        );
+
+        g.gain.exponentialRampToValueAtTime(
+            .001,
+            audio.currentTime+d
+        );
+
+        o.connect(g);
+        g.connect(audio.destination);
+
+        o.start();
+
+        o.stop(
+            audio.currentTime+d
+        );
+
+    }catch(e){}
+}
+
+/* =====================================================
+   LANE
+===================================================== */
+
+function setLane(){
+
+    p.style.left =
+        lanes[lane] + "%";
+}
+
+/* =====================================================
+   SPEED
+===================================================== */
+
+function mult(){
+
+    return boost ? 2.15 : 1;
+}
+
+/* =====================================================
+   UI
+===================================================== */
+
+function ui(){
+
+    let n =
+        Math.max(
+            0,
+            Math.round(nitro)
+        );
+
+    $("nitroVal").textContent = n;
+
+    $("fill").style.width =
+        n + "%";
+
+    $("score").textContent =
+        score;
+
+    $("coins").textContent =
+        coins;
+
+    $("lives").textContent =
+        lives;
+
+    $("distance").textContent =
+        dist.toFixed(1);
+
+    $("level").textContent =
+        level;
+}
+
+/* =====================================================
+   NITRO
+===================================================== */
+
+function stopBoost(){
+
+    boost = 0;
+
+    p.classList.remove("boost");
+
+    $("fx").classList.remove("nitro");
+
+    $("nitro").classList.remove("active");
+}
+
+function startBoost(){
+
+    if(
+        run &&
+        nitro > 0 &&
+        !boost
+    ){
+
+        boost = 1;
+
+        p.classList.add("boost");
+
+        $("fx").classList.add("nitro");
+
+        $("nitro").classList.add("active");
+
+        sound(
+            190,
+            .22,
+            "sawtooth",
+            .07
+        );
+    }
+}
+
+function updateNitro(){
+
+    if(
+        held &&
+        nitro > 0
+    ){
+
+        startBoost();
+
+        nitro -= .72;
+
+        if(nitro <= 0){
+
+            nitro = 0;
+
+            stopBoost();
+        }
+
+    }else{
+
+        stopBoost();
+
+        nitro =
+            Math.min(
+                100,
+                nitro + .22
+            );
+    }
+}
+
+/* =====================================================
+   MOVEMENT
+===================================================== */
+
+function move(d){
+
+    if(
+        run &&
+        lane+d >= 0 &&
+        lane+d < 3
+    ){
+
+        lane += d;
+
+        setLane();
+
+        sound(
+            260,
+            .06,
+            "square",
+            .025
+        );
+    }
+}
+
+/* =====================================================
+   COLLISION
+===================================================== */
+
+function rect(a,b){
+
+    let x =
+        a.getBoundingClientRect();
+
+    let y =
+        b.getBoundingClientRect();
+
+    return(
+        x.left < y.right &&
+        x.right > y.left &&
+        x.top < y.bottom &&
+        x.bottom > y.top
+    );
+}
+
+/* =====================================================
+   ENEMY
+===================================================== */
+
+function spawnEnemy(){
+
+    let e =
+        document.createElement("div");
+
+    let c =
+        [
+            "red",
+            "blue",
+            "yellow",
+            "green",
+            "orange"
+        ][
+            Math.random()*5|0
+        ];
+
+    e.className =
+        "car enemy " + c;
+
+    [
+        "fl",
+        "fr",
+        "bl",
+        "br"
+    ].forEach(k=>{
+
+        let w =
+            document.createElement("i");
+
+        w.className =
+            "tyre " + k;
+
+        e.append(w);
+    });
+
+    let l =
+        Math.random()*3|0;
+
+    e.style.left =
+        lanes[l] + "%";
+
+    road.append(e);
+
+    enemy.push({
+        e,
+        y:-120,
+        s:
+            4 +
+            Math.random()*2 +
+            bonus
+    });
+}
+
+/* =====================================================
+   OIL
+===================================================== */
+
+function spawnOil(){
+
+    let e =
+        document.createElement("div");
+
+    let l =
+        Math.random()*3|0;
+
+    e.className = "oil";
+
+    e.style.left =
+        lanes[l] + "%";
+
+    road.append(e);
+
+    oil.push({
+        e,
+        y:-80,
+        s:4+bonus
+    });
+}
+
+/* =====================================================
+   NORMAL ITEMS
+===================================================== */
+
+function spawnItem(){
+
+    let type =
+        [
+            "coin",
+            "coin",
+            "coin",
+            "magnet",
+            "shield",
+            "nitro"
+        ][
+            Math.random()*6|0
+        ];
+
+    let e =
+        document.createElement("div");
+
+    let l =
+        Math.random()*3|0;
+
+    e.className = "item";
+
+    e.textContent =
+        {
+            coin:"🪙",
+            magnet:"🧲",
+            shield:"🛡️",
+            nitro:"⚡"
+        }[type];
+
+    e.style.left =
+        lanes[l] + "%";
+
+    road.append(e);
+
+    items.push({
+        e,
+        y:-55,
+        s:4+bonus,
+        type
+    });
+}
+
+/* =====================================================
+   BOSS ATTACK TOKEN
+===================================================== */
+
+function spawnAttackToken(){
+
+    if(!boss)return;
+
+    let e =
+        document.createElement("div");
+
+    let l =
+        Math.random()*3|0;
+
+    e.className =
+        "attackToken";
+
+    e.textContent = "⚡";
+
+    e.style.left =
+        lanes[l] + "%";
+
+    road.append(e);
+
+    attacks.push({
+        e,
+        y:-65,
+        s:5.2+bonus
+    });
+}
+
+/* =====================================================
+   CREATE BOSS
+===================================================== */
+
+function makeBoss(){
+
+    let e =
+        document.createElement("div");
+
+    let bossLane =
+        Math.random()*3|0;
+
+    e.className =
+        "car boss";
+
+    e.style.left =
+        lanes[bossLane] + "%";
+
+    road.append(e);
+
+    boss = {
+
+        e,
+
+        y:-160,
+
+        lane:bossLane,
+
+        s:
+            3.8 +
+            level*.5
+    };
+
+    bossMaxHP = 100;
+    bossHP = 100;
+
+    bossPhase = 1;
+
+    bossAttackTimer = 0;
+    bossLaneTimer = 0;
+
+    bossAttacking = false;
+    bossAttackSpeed = 0;
+
+    $("bossHUD").style.display =
+        "block";
+
+    updateBossUI();
+
+    sound(
+        170,
+        .5,
+        "sawtooth",
+        .16
+    );
+}
+
+/* =====================================================
+   BOSS UI
+===================================================== */
+
+function updateBossUI(){
+
+    let percent =
+        Math.max(
+            0,
+            Math.min(
+                100,
+                bossHP
+            )
+        );
+
+    $("bossFill").style.width =
+        percent + "%";
+
+    if(bossPhase === 1){
+
+        $("bossPhase").textContent =
+            "PHASE 1 — HUNTER";
+    }
+
+    if(bossPhase === 2){
+
+        $("bossPhase").textContent =
+            "🔥 PHASE 2 — AGGRESSIVE";
+    }
+
+    if(bossPhase === 3){
+
+        $("bossPhase").textContent =
+            "😈 PHASE 3 — RAGE MODE";
+    }
+}
+
+/* =====================================================
+   BOSS PHASE
+===================================================== */
+
+function updateBossPhase(){
+
+    if(!boss)return;
+
+    if(
+        bossHP <= 30 &&
+        bossPhase !== 3
+    ){
+
+        bossPhase = 3;
+
+        boss.e.classList.add("rage");
+
+        sound(
+            90,
+            .5,
+            "sawtooth",
+            .16
+        );
+
+    }else if(
+        bossHP <= 60 &&
+        bossPhase === 1
+    ){
+
+        bossPhase = 2;
+
+        sound(
+            130,
+            .35,
+            "square",
+            .12
+        );
+    }
+
+    updateBossUI();
+}
+
+/* =====================================================
+   DAMAGE BOSS
+===================================================== */
+
+function damageBoss(){
+
+    if(!boss)return;
+
+    bossHP -= 10;
+
+    score += 100;
+
+    sound(
+        720,
+        .15,
+        "square",
+        .12
+    );
+
+    updateBossPhase();
+
+    if(navigator.vibrate){
+
+        navigator.vibrate(
+            [25,20,25]
+        );
+    }
+
+    if(bossHP <= 0){
+
+        defeatBoss();
+    }
+}
+
+/* =====================================================
+   BOSS DEFEATED
+===================================================== */
+
+function defeatBoss(){
+
+    if(!boss)return;
+
+    boss.e.remove();
+
+    boss = null;
+
+    attacks.forEach(
+        x => x.e.remove()
+    );
+
+    attacks = [];
+
+    bossAttacking = false;
+    bossAttackTimer = 0;
+    bossLaneTimer = 0;
+    bossAttackSpeed = 0;
+
+    $("bossHUD").style.display =
+        "none";
+
+    $("bossDefeat").classList.add(
+        "show"
+    );
+
+    /*
+       BOSS REWARD
+       Only reward the boss here.
+       levelComplete() will no longer
+       give the same reward again.
+    */
+
+    score +=
+        1000 +
+        level*500;
+
+    coins +=
+        20 +
+        level*5;
+
+    lives =
+        Math.min(
+            5,
+            lives+1
+        );
+
+    nitro = 100;
+
+    sound(
+        80,
+        .8,
+        "sawtooth",
+        .2
+    );
+
+    sound(
+        700,
+        .3,
+        "square",
+        .12
+    );
+
+    setTimeout(
+        ()=>{
+
+            $("bossDefeat")
+                .classList.remove(
+                    "show"
+                );
+
+            levelComplete();
+
+        },
+        1200
+    );
+}
+
+/* =====================================================
+   BOSS ATTACK
+===================================================== */
+
+function bossAttack(){
+
+    if(
+        !boss ||
+        bossAttacking
+    )return;
+
+    bossAttacking = true;
+
+    bossAttackSpeed =
+        boss.s *
+        (
+            bossPhase === 3
+                ? 3.2
+                : bossPhase === 2
+                    ? 2.5
+                    : 2
+        );
+
+    $("bossWarning")
+        .classList.add("show");
+
+    sound(
+        100,
+        .3,
+        "sawtooth",
+        .15
+    );
+
+    /*
+       IMPORTANT FIX:
+
+       The attack now has a defined
+       END point.
+
+       Before:
+       bossAttacking = true forever
+       until boss left the screen.
+
+       Now:
+       attack lasts 700ms.
+    */
+
+    setTimeout(
+        ()=>{
+
+            bossAttacking = false;
+            bossAttackSpeed = 0;
+
+            $("bossWarning")
+                .classList.remove("show");
+
+        },
+        700
+    );
+}
+
+/* =====================================================
+   COLLECT ITEM
+===================================================== */
+
+function collect(x){
+
+    x.e.remove();
+
+    items =
+        items.filter(
+            z => z !== x
+        );
+
+    if(x.type === "coin"){
+
+        coins++;
+
+        score += 50;
+
+        sound(
+            900,
+            .08,
+            "sine",
+            .1
+        );
+    }
+
+    if(x.type === "magnet"){
+
+        magnetUntil =
+            Date.now()+7000;
+
+        score += 100;
+
+        sound(
+            600,
+            .2,
+            "sine",
+            .1
+        );
+    }
+
+    if(x.type === "shield"){
+
+        shield = 1;
+
+        p.classList.add("shield");
+
+        score += 100;
+
+        sound(
+            720,
+            .2,
+            "sine",
+            .1
+        );
+    }
+
+    if(x.type === "nitro"){
+
+        nitro =
+            Math.min(
+                100,
+                nitro+45
+            );
+
+        score += 75;
+
+        sound(
+            420,
+            .2,
+            "sawtooth",
+            .1
+        );
+    }
+}
+
+/* =====================================================
+   CRASH
+===================================================== */
+
+function crash(){
+
+    if(shield){
+
+        shield = 0;
+
+        p.classList.remove(
+            "shield"
+        );
+
+        score += 75;
+
+        sound(
+            620,
+            .25,
+            "sine",
+            .12
+        );
+
+        return;
+    }
+
+    lives--;
+
+    sound(
+        80,
+        .4,
+        "sawtooth",
+        .18
+    );
+
+    if(lives <= 0){
+
+        gameOver();
+    }
+}
+
+/* =====================================================
+   LEVEL COMPLETE
+===================================================== */
+
+function levelComplete(){
+
+    run = 0;
+
+    held = 0;
+
+    stopBoost();
+
+    bossAttacking = false;
+    bossAttackTimer = 0;
+    bossLaneTimer = 0;
+    bossAttackSpeed = 0;
+
+    let completedLevel =
+        level;
+
+    /*
+       IMPORTANT FIX:
+
+       Boss rewards are already given
+       in defeatBoss().
+
+       Therefore we DON'T give the
+       same score/coins again here.
+    */
+
+    high =
+        Math.max(
+            high,
+            score
+        );
+
+    localStorage.setItem(
+        "finalRaceHighScore",
+        high
+    );
+
+    $("title").textContent =
+        "🏆 LEVEL " +
+        completedLevel +
+        " COMPLETE!";
+
+    $("msg").textContent =
+        "Boss defeated! Reward received • Best score: " +
+        high;
+
+    $("start").textContent =
+        "NEXT LEVEL";
+
+    $("screen").style.display =
+        "flex";
+
+    /*
+       Prepare next level.
+    */
+
+    level++;
+
+    bonus += .7;
+
+    nitro = 100;
+
+    ui();
+}
+
+/* =====================================================
+   GAME OVER
+===================================================== */
+
+function gameOver(){
+
+    run = 0;
+
+    held = 0;
+
+    stopBoost();
+
+    high =
+        Math.max(
+            high,
+            score
+        );
+
+    localStorage.setItem(
+        "finalRaceHighScore",
+        high
+    );
+
+    $("bossHUD").style.display =
+        "none";
+
+    $("bossWarning")
+        .classList.remove("show");
+
+    $("title").textContent =
+        "💥 GAME OVER";
+
+    $("msg").textContent =
+        "Score: " +
+        score +
+        " • Best score: " +
+        high;
+
+    $("start").textContent =
+        "PLAY AGAIN";
+
+    $("screen").style.display =
+        "flex";
+
+    ui();
+}
+
+/* =====================================================
+   GAME OBJECTS
+===================================================== */
+
+function objects(){
+
+    /* =========================
+       ENEMY CARS
+    ========================= */
+
+    for(let a of [...enemy]){
+
+        a.y +=
+            a.s *
+            mult();
+
+        a.e.style.top =
+            a.y + "px";
+
+        if(
+            rect(
+                p,
+                a.e
+            )
+        ){
+
+            a.e.remove();
+
+            enemy =
+                enemy.filter(
+                    z => z !== a
+                );
+
+            crash();
+
+            if(!run)return;
+        }
+
+        if(
+            a.y >
+            innerHeight
+        ){
+
+            a.e.remove();
+
+            enemy =
+                enemy.filter(
+                    z => z !== a
+                );
+        }
+    }
+
+    /* =========================
+       OIL
+    ========================= */
+
+    for(let a of [...oil]){
+
+        a.y +=
+            a.s *
+            mult();
+
+        a.e.style.top =
+            a.y + "px";
+
+        if(
+            rect(
+                p,
+                a.e
+            )
+        ){
+
+            a.e.remove();
+
+            oil =
+                oil.filter(
+                    z => z !== a
+                );
+
+            lane =
+                Math.max(
+                    0,
+                    Math.min(
+                        2,
+                        lane +
+                        (
+                            Math.random()<.5
+                                ? -1
+                                : 1
+                        )
+                    )
+                );
+
+            setLane();
+
+            sound(
+                180,
+                .25,
+                "triangle",
+                .1
+            );
+        }
+
+        if(
+            a.y >
+            innerHeight
+        ){
+
+            a.e.remove();
+
+            oil =
+                oil.filter(
+                    z => z !== a
+                );
+        }
+    }
+
+    /* =========================
+       ITEMS
+    ========================= */
+
+    for(let a of [...items]){
+
+        a.y +=
+            a.s *
+            mult();
+
+        /*
+           REAL MAGNET CHECK
+
+           Before:
+           any coin above 25% of the
+           screen was automatically
+           collected.
+
+           Now we calculate actual
+           distance between player
+           and coin.
+        */
+
+        if(
+            a.type === "coin" &&
+            Date.now() < magnetUntil
+        ){
+
+            let pr =
+                p.getBoundingClientRect();
+
+            let ir =
+                a.e.getBoundingClientRect();
+
+            let px =
+                pr.left +
+                pr.width/2;
+
+            let py =
+                pr.top +
+                pr.height/2;
+
+            let ix =
+                ir.left +
+                ir.width/2;
+
+            let iy =
+                ir.top +
+                ir.height/2;
+
+            let dx =
+                px - ix;
+
+            let dy =
+                py - iy;
+
+            let distance =
+                Math.sqrt(
+                    dx*dx +
+                    dy*dy
+                );
+
+            /*
+               Pull the coin toward
+               the player when close.
+            */
+
+            if(distance < 180){
+
+                a.y +=
+                    (py - iy) * .18;
+
+                let roadRect =
+                    road.getBoundingClientRect();
+
+                let targetX =
+                    (
+                        (px - roadRect.left) /
+                        roadRect.width
+                    ) * 100;
+
+                let currentX =
+                    parseFloat(
+                        a.e.style.left
+                    );
+
+                if(!Number.isNaN(currentX)){
+
+                    a.e.style.left =
+                        (
+                            currentX +
+                            (targetX-currentX)*.18
+                        ) + "%";
+                }
+
+                if(distance < 45){
+
+                    collect(a);
+                    continue;
+                }
+            }
+        }
+
+        a.e.style.top =
+            a.y + "px";
+
+        if(
+            rect(
+                p,
+                a.e
+            )
+        ){
+
+            collect(a);
+            continue;
+        }
+
+        if(
+            a.y >
+            innerHeight
+        ){
+
+            a.e.remove();
+
+            items =
+                items.filter(
+                    z => z !== a
+                );
+        }
+    }
+
+    /* =========================
+       ATTACK TOKENS
+    ========================= */
+
+    for(let a of [...attacks]){
+
+        a.y +=
+            a.s *
+            mult();
+
+        a.e.style.top =
+            a.y + "px";
+
+        if(
+            rect(
+                p,
+                a.e
+            )
+        ){
+
+            a.e.remove();
+
+            attacks =
+                attacks.filter(
+                    z => z !== a
+                );
+
+            damageBoss();
+        }
+
+        if(
+            a.y >
+            innerHeight
+        ){
+
+            a.e.remove();
+
+            attacks =
+                attacks.filter(
+                    z => z !== a
+                );
+        }
+    }
+
+    /* =========================
+       BOSS
+    ========================= */
+
+    if(boss){
+
+        if(bossAttacking){
+
+            boss.y +=
+                bossAttackSpeed;
+
+        }else{
+
+            boss.y +=
+                boss.s *
+                mult();
+        }
+
+        boss.e.style.top =
+            boss.y + "px";
+
+        /* =====================
+           BOSS LANE MOVEMENT
+        ===================== */
+
+        bossLaneTimer++;
+
+        let laneChangeRate =
+            bossPhase === 3
+                ? 45
+                : bossPhase === 2
+                    ? 70
+                    : 100;
+
+        if(
+            bossLaneTimer >
+            laneChangeRate
+        ){
+
+            bossLaneTimer = 0;
+
+            let direction =
+                Math.random()<.5
+                    ? -1
+                    : 1;
+
+            let next =
+                Math.max(
+                    0,
+                    Math.min(
+                        2,
+                        boss.lane +
+                        direction
+                    )
+                );
+
+            boss.lane = next;
+
+            boss.e.style.left =
+                lanes[boss.lane] +
+                "%";
+        }
+
+        /* =====================
+           BOSS COLLISION
+        ===================== */
+
+        if(
+            rect(
+                p,
+                boss.e
+            )
+        ){
+
+            crash();
+
+            if(boss){
+
+                boss.y = -200;
+
+                bossAttacking = false;
+                bossAttackSpeed = 0;
+            }
+
+            if(!run)return;
+        }
+
+        /* =====================
+           BOSS LEAVES SCREEN
+        ===================== */
+
+        if(
+            boss &&
+            boss.y >
+            innerHeight+160
+        ){
+
+            boss.y = -160;
+
+            bossAttacking = false;
+            bossAttackSpeed = 0;
+        }
+    }
+}
+
+/* =====================================================
+   MAIN LOOP
+===================================================== */
+
+function loop(){
+
+    if(!run)return;
+
+    /* SCORE */
+
+    score +=
+        boost
+            ? 3
+            : 1;
+
+    /* DISTANCE */
+
+    dist +=
+        .01 *
+        mult();
+
+    /* NITRO */
+
+    updateNitro();
+
+    /* BOSS DISTANCE */
+
+    let target =
+        level * 10;
+
+    if(
+        dist >= target &&
+        !boss
+    ){
+
+        makeBoss();
+    }
+
+    /* =========================
+       NORMAL SPAWNING
+    ========================= */
+
+    if(!boss){
+
+        if(
+            ++et >
+            Math.max(
+                35,
+                70-level*4
+            )
+        ){
+
+            spawnEnemy();
+
+            et = 0;
+        }
+
+        if(
+            ++ot >
+            Math.max(
+                100,
+                180-level*4
+            )
+        ){
+
+            spawnOil();
+
+            ot = 0;
+        }
+
+        if(
+            ++it > 130
+        ){
+
+            spawnItem();
+
+            it = 0;
+        }
+    }
+
+    /* =========================
+       BOSS SPAWNING
+    ========================= */
+
+    if(boss){
+
+        if(
+            ++at >
+            75
+        ){
+
+            spawnAttackToken();
+
+            at = 0;
+        }
+
+        bossAttackTimer++;
+
+        let attackRate =
+            bossPhase === 3
+                ? 150
+                : bossPhase === 2
+                    ? 200
+                    : 260;
+
+        if(
+            bossAttackTimer >
+            attackRate &&
+            !bossAttacking
+        ){
+
+            bossAttackTimer = 0;
+
+            bossAttack();
+        }
+
+    }else{
+
+        at = 0;
+    }
+
+    objects();
+
+    if(!run)return;
+
+    /* =========================
+       ROAD LINES
+    ========================= */
+
+    line +=
+        (8+bonus) *
+        mult();
+
+    if(line > 200)
+        line = 0;
+
+    $("l1").style.top =
+    $("l2").style.top =
+        (-100+line) + "px";
+
+    /* =========================
+       SPEED FX
+    ========================= */
+
+    $("fx").style.opacity =
+        boost
+            ? .92
+            : Math.min(
+                .6,
+                .15+
+                level*.03
+            );
+
+    ui();
+
+    requestAnimationFrame(loop);
+}
+
+/* =====================================================
+   CONTROLS
+===================================================== */
+
+$("left").onclick =
+    () => move(-1);
+
+$("right").onclick =
+    () => move(1);
+
+/* =====================================================
+   KEYBOARD
+===================================================== */
+
+document.onkeydown = e => {
+
+    /*
+       Prevent repeated movement
+       when holding an arrow key.
+    */
+
+    if(e.repeat)return;
+
+    if(
+        e.key === "ArrowLeft"
+    ){
+
+        e.preventDefault();
+
+        move(-1);
+    }
+
+    if(
+        e.key === "ArrowRight"
+    ){
+
+        e.preventDefault();
+
+        move(1);
+    }
+
+    if(
+        e.code === "Space"
+    ){
+
+        e.preventDefault();
+
+        held = 1;
+
+        startBoost();
+    }
+};
+
+document.onkeyup = e => {
+
+    if(
+        e.code === "Space"
+    ){
+
+        held = 0;
+
+        stopBoost();
+    }
+};
+
+/* =====================================================
+   PHONE NITRO
+===================================================== */
+
+$("nitro").onpointerdown = e => {
+
+    e.preventDefault();
+
+    held = 1;
+
+    startBoost();
+};
+
+[
+    "pointerup",
+    "pointerleave",
+    "pointercancel"
+].forEach(
+    x =>
+        $("nitro").addEventListener(
+            x,
+            () => {
+
+                held = 0;
+
+                stopBoost();
+            }
+        )
+);
+
+/* =====================================================
+   RESET
+===================================================== */
+
+function resetGame(){
+
+    run = 0;
+    held = 0;
+    boost = 0;
+
+    score = 0;
+    coins = 0;
+    dist = 0;
+    lives = 3;
+    nitro = 100;
+
+    shield = 0;
+    magnetUntil = 0;
+
+    level = 1;
+    bonus = 0;
+
+    et = 0;
+    ot = 0;
+    it = 0;
+    at = 0;
+    line = 0;
+
+    lane = 1;
+
+    /* BOSS RESET */
+
+    bossMaxHP = 100;
+    bossHP = 100;
+    bossPhase = 1;
+
+    bossAttackTimer = 0;
+    bossLaneTimer = 0;
+
+    bossAttacking = false;
+    bossAttackSpeed = 0;
+
+    /* REMOVE OBJECTS */
+
+    enemy.forEach(
+        x => x.e.remove()
+    );
+
+    oil.forEach(
+        x => x.e.remove()
+    );
+
+    items.forEach(
+        x => x.e.remove()
+    );
+
+    attacks.forEach(
+        x => x.e.remove()
+    );
+
+    if(boss)
+        boss.e.remove();
+
+    enemy = [];
+    oil = [];
+    items = [];
+    attacks = [];
+
+    boss = null;
+
+    /* REMOVE PLAYER EFFECTS */
+
+    p.classList.remove(
+        "boost",
+        "shield"
+    );
+
+    $("bossHUD").style.display =
+        "none";
+
+    $("bossWarning")
+        .classList.remove("show");
+
+    $("bossDefeat")
+        .classList.remove("show");
+
+    setLane();
+
+    ui();
+}
+
+/* =====================================================
+   COUNTDOWN
+===================================================== */
+
+function countdown(){
+
+    /*
+       Prevent multiple countdowns.
+    */
+
+    if(countingDown)return;
+
+    countingDown = true;
+
+    let n = 3;
+
+    $("count").style.display =
+        "block";
+
+    $("count").textContent =
+        n;
+
+    let t =
+        setInterval(
+            () => {
+
+                n--;
+
+                if(n){
+
+                    $("count")
+                        .textContent =
+                        n;
+
+                }else{
+
+                    clearInterval(t);
+
+                    $("count")
+                        .textContent =
+                        "GO!";
+
+                    setTimeout(
+                        () => {
+
+                            $("count")
+                                .style.display =
+                                "none";
+
+                            countingDown = false;
+
+                            run = 1;
+
+                            loop();
+
+                        },
+                        400
+                    );
+                }
+
+            },
+            650
+        );
+}
+
+/* =====================================================
+   START
+===================================================== */
+
+$("start").onclick = () => {
+
+    try{
+
+        if(!audio){
+
+            audio =
+                new(
+                    window.AudioContext ||
+                    window.webkitAudioContext
+                )();
+        }
+
+        audio.resume();
+
+    }catch(e){}
+
+    if(
+        $("start").textContent ===
+        "PLAY AGAIN"
+    ){
+
+        resetGame();
+    }
+
+    $("screen").style.display =
+        "none";
+
+    countdown();
+};
+
+/* =====================================================
+   INITIALIZE
+===================================================== */
+
+setLane();
+
+ui();
+
+</script>
+
+</body>
+</html>
